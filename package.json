@@ -1,0 +1,21 @@
+{
+  "name": "motorymyd",
+  "version": "1.0.0",
+  "description": "МОТО РЫМЫД - приложение для каталога двигателей",
+  "main": "index.js",
+  "scripts": {
+    "start": "cd server && npm start",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm start",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm run build",
+    "postinstall": "npm run install:all"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+} 
