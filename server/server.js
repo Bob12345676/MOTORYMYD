@@ -9,9 +9,6 @@ const connectDB = require('./config/db');
 // Загрузка переменных окружения
 dotenv.config();
 
-// Подключение к базе данных
-connectDB();
-
 // Инициализация Express
 const app = express();
 
@@ -34,38 +31,70 @@ app.use(fileUpload({
   tempFileDir: '/tmp/'
 }));
 
-// Маршруты API
-app.use('/api/motors', require('./routes/motors'));
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/upload', require('./routes/upload'));
+// Обработка подключения к MongoDB
+const startServer = async () => {
+  const isConnected = await connectDB();
+  
+  // Маршруты API только если есть подключение к БД
+  if (isConnected) {
+    app.use('/api/motors', require('./routes/motors'));
+    app.use('/api/auth', require('./routes/auth'));
+    app.use('/api/upload', require('./routes/upload'));
+  } else {
+    // Добавим заглушки для API при отсутствии подключения к БД
+    app.use('/api/motors', (req, res) => {
+      res.status(503).json({
+        success: false,
+        error: 'База данных недоступна. Пожалуйста, попробуйте позже.'
+      });
+    });
+    
+    app.use('/api/auth', (req, res) => {
+      res.status(503).json({
+        success: false,
+        error: 'База данных недоступна. Пожалуйста, попробуйте позже.'
+      });
+    });
+    
+    app.use('/api/upload', (req, res) => {
+      res.status(503).json({
+        success: false,
+        error: 'База данных недоступна. Пожалуйста, попробуйте позже.'
+      });
+    });
+  }
 
-// Обработка статических ресурсов в продакшне
-if (process.env.NODE_ENV === 'production') {
-  // Статические файлы
-  app.use(express.static(path.join(__dirname, '../client/build')));
+  // Обработка статических ресурсов в продакшне
+  if (process.env.NODE_ENV === 'production') {
+    // Статические файлы
+    app.use(express.static(path.join(__dirname, '../client/build')));
 
-  // Все запросы, кроме API, перенаправляем на React
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, '../client', 'build', 'index.html'));
+    // Все запросы, кроме API, перенаправляем на React
+    app.get('*', (req, res) => {
+      res.sendFile(path.resolve(__dirname, '../client', 'build', 'index.html'));
+    });
+  } else {
+    // Обработка главной страницы в режиме разработки
+    app.get('/', (req, res) => {
+      res.send('API запущено...');
+    });
+  }
+
+  // Обработка ошибок
+  app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+      success: false,
+      error: err.message || 'Ошибка сервера'
+    });
   });
-} else {
-  // Обработка главной страницы в режиме разработки
-  app.get('/', (req, res) => {
-    res.send('API запущено...');
-  });
-}
 
-// Обработка ошибок
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    error: err.message || 'Ошибка сервера'
+  // Запуск сервера
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Сервер запущен в ${process.env.NODE_ENV} режиме на порту ${PORT}`);
   });
-});
+};
 
-// Запуск сервера
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Сервер запущен в ${process.env.NODE_ENV} режиме на порту ${PORT}`);
-}); 
+// Запускаем сервер
+startServer(); 

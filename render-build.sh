@@ -124,26 +124,33 @@ echo "🔧 Fixing permissions for react-scripts..."
 chmod +x node_modules/.bin/react-scripts
 chmod +x node_modules/react-scripts/bin/react-scripts.js
 
-# Create a minimal App.js if needed
-if [ ! -d "src" ]; then
-  echo "⚠️ Creating minimal React app structure..."
-  mkdir -p src/components src/pages public
-  
+# Create public directory and index.html if needed
+mkdir -p public
+if [ ! -f "public/index.html" ]; then
+  echo "⚠️ Creating index.html in public directory..."
   cat > public/index.html << 'EOL'
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MOTORYMYD</title>
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="МОТОРЫМЫД - Каталог двигателей и моторов" />
+    <title>МОТО РЫМЫД</title>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>Для работы приложения необходимо включить JavaScript.</noscript>
     <div id="root"></div>
   </body>
 </html>
 EOL
+fi
 
+# Create a minimal App.js if needed
+if [ ! -d "src" ]; then
+  echo "⚠️ Creating minimal React app structure..."
+  mkdir -p src/components src/pages
+  
   cat > src/index.js << 'EOL'
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -178,46 +185,58 @@ echo "🏗️ Building client app..."
 # Try different build approaches
 BUILD_SUCCESS=false
 
-# Approach 1: Direct build with CI=false to ignore warnings
-echo "Trying build with CI=false..."
-if CI=false NODE_ENV=production node ./node_modules/.bin/react-scripts build; then
+# Create build folder and use custom build approach if react-scripts fails
+echo "Creating build directory and setting up production build..."
+mkdir -p build
+
+# Copy all files from client/src/assets to build if directory exists
+if [ -d "src/assets" ]; then
+  echo "Copying assets..."
+  mkdir -p build/assets
+  cp -r src/assets/* build/assets/ 2>/dev/null || :
+fi
+
+# Copy public files to build
+echo "Copying public files..."
+cp -r public/* build/ 2>/dev/null || :
+
+# Try to run npm run build
+echo "Trying npm run build with environment variables..."
+if PUBLIC_URL=./ CI=false INLINE_RUNTIME_CHUNK=false npm run build; then
   BUILD_SUCCESS=true
   echo "✅ Standard build successful"
 else
-  echo "⚠️ Standard build failed, trying fallback methods..."
+  echo "⚠️ Standard build failed, creating static fallback..."
   
-  # Approach 2: Using npx with executable path
-  echo "Trying build with explicit path..."
-  if CI=false NODE_ENV=production node node_modules/react-scripts/scripts/build.js; then
-    BUILD_SUCCESS=true
-    echo "✅ Explicit path build successful"
-  else  
-    # Approach 3: Create minimal build manually
-    echo "⚠️ All build methods failed, creating minimal static build..."
-    mkdir -p build
-    cat > build/index.html << 'EOL'
+  # Create a simple index.html for fallback
+  cat > build/index.html << 'EOL'
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>MOTORYMYD</title>
+    <title>МОТОРЫМЫД</title>
     <style>
       body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
       h1 { color: #333; }
     </style>
   </head>
   <body>
-    <h1>MOTORYMYD</h1>
+    <h1>МОТОРЫМЫД</h1>
     <p>Приложение каталога двигателей</p>
     <p>Сервер успешно запущен, но клиентская часть не может быть собрана.</p>
     <p>Пожалуйста, свяжитесь с администратором.</p>
   </body>
 </html>
 EOL
-    BUILD_SUCCESS=true
-    echo "✅ Created minimal static build"
-  fi
+
+  # Create basic JS and CSS files
+  mkdir -p build/static/css build/static/js
+  echo "/* Fallback CSS */" > build/static/css/main.css
+  echo "// Fallback JS" > build/static/js/main.js
+  
+  BUILD_SUCCESS=true
+  echo "✅ Created static fallback build"
 fi
 
 if [ "$BUILD_SUCCESS" = false ]; then
