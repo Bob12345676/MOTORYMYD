@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { toast } from 'react-toastify';
 import { Motor } from '../../types/Motor';
-import { RootState } from '../store';
+import { RootState, MotorsState } from '../types';
 import api from '../../utils/api';
 
 interface Dimensions {
@@ -25,25 +25,6 @@ export interface MotorsResponse {
 export interface MotorResponse {
   success: boolean;
   data: Motor;
-}
-
-interface MotorsState {
-  motors: Motor[];
-  motorDetails: Motor | null;
-  loading: boolean;
-  error: string | null;
-  total: number;
-  pagination: {
-    pages: number;
-    page: number;
-    limit: number;
-  };
-  filters: {
-    search: string;
-    minPower: number | null;
-    maxPower: number | null;
-    available: boolean | null;
-  };
 }
 
 const initialState: MotorsState = {

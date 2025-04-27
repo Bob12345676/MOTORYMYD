@@ -1,21 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: string;
-}
-
-interface AuthState {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  loading: boolean;
-  error: string | null;
-}
+import { User, AuthState } from '../types';
+import api from '../../utils/api';
 
 const initialState: AuthState = {
   user: null,
@@ -33,12 +20,7 @@ export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { rejectWi
       return rejectWithValue('Токен не найден');
     }
 
-    const response = await axios.get('/api/auth/me', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
+    const response = await api.get('/auth/me');
     return { user: response.data.data, token };
   } catch (error: any) {
     localStorage.removeItem('token');
@@ -58,7 +40,7 @@ export const register = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await axios.post('/api/auth/register', userData);
+      const response = await api.post('/auth/register', userData);
       
       const { token, data } = response.data;
       localStorage.setItem('token', token);
@@ -83,7 +65,7 @@ export const login = createAsyncThunk(
   'auth/login',
   async (userData: { email: string; password: string }, { rejectWithValue }) => {
     try {
-      const response = await axios.post('/api/auth/login', userData);
+      const response = await api.post('/auth/login', userData);
       
       const { token, data } = response.data;
       localStorage.setItem('token', token);
@@ -106,19 +88,7 @@ export const login = createAsyncThunk(
 // Выход пользователя
 export const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
   try {
-    const token = localStorage.getItem('token');
-    
-    if (token) {
-      await axios.post(
-        '/api/auth/logout',
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-    }
+    await api.post('/auth/logout');
     
     localStorage.removeItem('token');
     toast.success('Выход выполнен');

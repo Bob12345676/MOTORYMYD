@@ -1,15 +1,23 @@
 export interface Motor {
   _id: string;
   name: string;
+  model: string;
   description: string;
-  price: number;
   power: number;
+  voltage: number;
+  current: number;
+  speed: number;
   weight: number;
+  dimensions: {
+    length: number;
+    width: number;
+    height: number;
+  };
+  images: string[];
+  features: string[];
+  applications: string[];
+  price: number;
   available: boolean;
-  imageUrl?: string;
-  category: string;
-  manufacturer: string;
-  specifications: Record<string, string | number>;
   createdAt: string;
   updatedAt: string;
 } 

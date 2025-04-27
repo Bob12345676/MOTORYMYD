@@ -1,18 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-
-interface UiState {
-  darkMode: boolean;
-  sidebarOpen: boolean;
-  mobileMenuOpen: boolean;
-  confirmDialog: {
-    open: boolean;
-    title: string;
-    message: string;
-    confirmText: string;
-    cancelText: string;
-    onConfirm: (() => void) | null;
-  };
-}
+import { UiState } from '../types';
 
 const initialState: UiState = {
   darkMode: localStorage.getItem('darkMode') === 'true',

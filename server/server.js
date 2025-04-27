@@ -31,38 +31,84 @@ app.use(fileUpload({
   tempFileDir: '/tmp/'
 }));
 
+// Функция для проверки статуса MongoDB
+const checkMongoDBStatus = () => {
+  return new Promise(async (resolve) => {
+    try {
+      const isConnected = await connectDB();
+      console.log(`MongoDB статус: ${isConnected ? 'Подключено' : 'Отключено'}`);
+      resolve(isConnected);
+    } catch (error) {
+      console.error('Ошибка при проверке статуса MongoDB:', error);
+      resolve(false);
+    }
+  });
+};
+
 // Обработка подключения к MongoDB
 const startServer = async () => {
-  const isConnected = await connectDB();
+  let isConnected = await checkMongoDBStatus();
   
-  // Маршруты API только если есть подключение к БД
-  if (isConnected) {
-    app.use('/api/motors', require('./routes/motors'));
-    app.use('/api/auth', require('./routes/auth'));
-    app.use('/api/upload', require('./routes/upload'));
-  } else {
-    // Добавим заглушки для API при отсутствии подключения к БД
-    app.use('/api/motors', (req, res) => {
-      res.status(503).json({
-        success: false,
-        error: 'База данных недоступна. Пожалуйста, попробуйте позже.'
-      });
-    });
+  // Маршруты API с проверкой подключения к БД для каждого запроса
+  app.use('/api/motors', async (req, res, next) => {
+    if (!isConnected) {
+      // Пробуем восстановить соединение при каждом запросе
+      isConnected = await checkMongoDBStatus();
+    }
     
-    app.use('/api/auth', (req, res) => {
-      res.status(503).json({
+    if (isConnected) {
+      return require('./routes/motors')(req, res, next);
+    } else {
+      return res.status(503).json({
         success: false,
         error: 'База данных недоступна. Пожалуйста, попробуйте позже.'
       });
-    });
+    }
+  });
+  
+  app.use('/api/auth', async (req, res, next) => {
+    if (!isConnected) {
+      // Пробуем восстановить соединение при каждом запросе
+      isConnected = await checkMongoDBStatus();
+    }
     
-    app.use('/api/upload', (req, res) => {
-      res.status(503).json({
+    if (isConnected) {
+      return require('./routes/auth')(req, res, next);
+    } else {
+      return res.status(503).json({
         success: false,
         error: 'База данных недоступна. Пожалуйста, попробуйте позже.'
       });
+    }
+  });
+  
+  app.use('/api/upload', async (req, res, next) => {
+    if (!isConnected) {
+      // Пробуем восстановить соединение при каждом запросе
+      isConnected = await checkMongoDBStatus();
+    }
+    
+    if (isConnected) {
+      return require('./routes/upload')(req, res, next);
+    } else {
+      return res.status(503).json({
+        success: false,
+        error: 'База данных недоступна. Пожалуйста, попробуйте позже.'
+      });
+    }
+  });
+
+  // API статуса для проверки соединения с MongoDB
+  app.get('/api/status', async (req, res) => {
+    // Обновляем статус при запросе
+    isConnected = await checkMongoDBStatus();
+    
+    res.json({ 
+      status: 'online',
+      databaseStatus: isConnected ? 'connected' : 'disconnected',
+      message: isConnected ? 'Сервер работает и подключен к базе данных' : 'Сервер работает, но нет подключения к базе данных'
     });
-  }
+  });
 
   // Обработка статических ресурсов в продакшне
   if (process.env.NODE_ENV === 'production') {
@@ -93,7 +139,24 @@ const startServer = async () => {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
     console.log(`Сервер запущен в ${process.env.NODE_ENV} режиме на порту ${PORT}`);
+    console.log(`MongoDB статус: ${isConnected ? 'Подключено' : 'Не подключено'}`);
+    console.log(`Для подключения к MongoDB необходимо добавить IP-адрес в MongoDB Atlas`);
   });
+  
+  // Настраиваем периодическую проверку состояния MongoDB
+  setInterval(async () => {
+    const previousStatus = isConnected;
+    isConnected = await checkMongoDBStatus();
+    
+    // Логируем изменение статуса
+    if (previousStatus !== isConnected) {
+      if (isConnected) {
+        console.log('✅ Подключение к MongoDB восстановлено');
+      } else {
+        console.log('❌ Потеряно подключение к MongoDB');
+      }
+    }
+  }, 60000); // Проверяем каждую минуту
 };
 
 // Запускаем сервер

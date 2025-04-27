@@ -134,7 +134,9 @@ const MotorDetailPage: React.FC = () => {
             <Paper elevation={2} sx={{ p: 2, height: '100%' }}>
               <Box
                 component="img"
-                src={motorDetails.imageUrl || 'https://via.placeholder.com/500x400?text=Нет+изображения'}
+                src={motorDetails.images && motorDetails.images.length > 0 
+                  ? motorDetails.images[0] 
+                  : 'https://via.placeholder.com/500x400?text=Нет+изображения'}
                 alt={motorDetails.name}
                 sx={{
                   width: '100%',
@@ -151,6 +153,10 @@ const MotorDetailPage: React.FC = () => {
             <Box>
               <Typography variant="h4" component="h1" gutterBottom>
                 {motorDetails.name}
+              </Typography>
+              
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                Модель: {motorDetails.model}
               </Typography>
               
               <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
@@ -197,21 +203,9 @@ const MotorDetailPage: React.FC = () => {
               <Divider sx={{ my: 2 }} />
 
               <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-                Характеристики
+                Технические характеристики
               </Typography>
               <List dense>
-                <ListItem>
-                  <ListItemText 
-                    primary="Категория" 
-                    secondary={motorDetails.category} 
-                  />
-                </ListItem>
-                <ListItem>
-                  <ListItemText 
-                    primary="Производитель" 
-                    secondary={motorDetails.manufacturer} 
-                  />
-                </ListItem>
                 <ListItem>
                   <ListItemText 
                     primary="Мощность" 
@@ -220,11 +214,61 @@ const MotorDetailPage: React.FC = () => {
                 </ListItem>
                 <ListItem>
                   <ListItemText 
+                    primary="Напряжение" 
+                    secondary={`${motorDetails.voltage} В`} 
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Ток" 
+                    secondary={`${motorDetails.current} А`} 
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Скорость вращения" 
+                    secondary={`${motorDetails.speed} об/мин`} 
+                  />
+                </ListItem>
+                <ListItem>
+                  <ListItemText 
                     primary="Вес" 
                     secondary={`${motorDetails.weight} кг`} 
                   />
                 </ListItem>
+                <ListItem>
+                  <ListItemText 
+                    primary="Габариты" 
+                    secondary={`${motorDetails.dimensions?.length} × ${motorDetails.dimensions?.width} × ${motorDetails.dimensions?.height} мм`} 
+                  />
+                </ListItem>
               </List>
+
+              {motorDetails.features && motorDetails.features.length > 0 && (
+                <>
+                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mt: 2 }}>
+                    Особенности
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {motorDetails.features.map((feature, index) => (
+                      <Chip key={index} label={feature} size="small" />
+                    ))}
+                  </Box>
+                </>
+              )}
+
+              {motorDetails.applications && motorDetails.applications.length > 0 && (
+                <>
+                  <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', mt: 2 }}>
+                    Применение
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {motorDetails.applications.map((application, index) => (
+                      <Chip key={index} label={application} size="small" />
+                    ))}
+                  </Box>
+                </>
+              )}
 
               <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
                 <Button
@@ -249,15 +293,15 @@ const MotorDetailPage: React.FC = () => {
               {/* Кнопки администратора */}
               {isAuthenticated && user && user.role === 'admin' && (
                 <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-                  <Button 
-                    variant="outlined" 
+                  <Button
+                    variant="outlined"
                     color="info"
                     onClick={() => navigate(`/admin/motors/edit/${motorDetails._id}`)}
                   >
                     Редактировать
                   </Button>
-                  <Button 
-                    variant="outlined" 
+                  <Button
+                    variant="outlined"
                     color="error"
                     onClick={handleDeleteClick}
                   >

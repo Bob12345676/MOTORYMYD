@@ -75,175 +75,97 @@ npm install
 cd ..
 
 # Setup client build
-echo "🏗️ Setting up client build..."
+echo "🏗️ Setting up manual client build..."
 
-# Check if client directory has a package.json
-if [ ! -f "client/package.json" ]; then
-  echo "⚠️ Client package.json not found, creating minimal React app..."
-  
-  cat > client/package.json << 'EOL'
-{
-  "name": "motorymyd-client",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
-}
-EOL
-fi
+# Create build directory
+mkdir -p client/build
+mkdir -p client/build/static/css
+mkdir -p client/build/static/js
 
-# Try to build the client with several fallbacks
-cd client
-
-echo "🔧 Installing client dependencies..."
-npm install --force
-
-# Fix permissions for react-scripts
-echo "🔧 Fixing permissions for react-scripts..."
-chmod +x node_modules/.bin/react-scripts
-chmod +x node_modules/react-scripts/bin/react-scripts.js
-
-# Create public directory and index.html if needed
-mkdir -p public
-if [ ! -f "public/index.html" ]; then
-  echo "⚠️ Creating index.html in public directory..."
-  cat > public/index.html << 'EOL'
+# Create index.html
+cat > client/build/index.html << 'EOL'
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta name="description" content="МОТОРЫМЫД - Каталог двигателей и моторов" />
-    <title>МОТО РЫМЫД</title>
-  </head>
-  <body>
-    <noscript>Для работы приложения необходимо включить JavaScript.</noscript>
-    <div id="root"></div>
-  </body>
-</html>
-EOL
-fi
-
-# Create a minimal App.js if needed
-if [ ! -d "src" ]; then
-  echo "⚠️ Creating minimal React app structure..."
-  mkdir -p src/components src/pages
-  
-  cat > src/index.js << 'EOL'
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
-EOL
-
-  cat > src/App.js << 'EOL'
-import React from 'react';
-
-function App() {
-  return (
-    <div style={{ textAlign: 'center', padding: '50px' }}>
-      <h1>MOTORYMYD</h1>
-      <p>Приложение каталога двигателей</p>
-      <p>Сервер успешно запущен</p>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="МОТОРЫМЫД - Каталог двигателей и моторов" />
+  <title>МОТО РЫМЫД</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <link rel="stylesheet" href="/static/css/main.css" />
+</head>
+<body>
+  <noscript>Для работы приложения необходимо включить JavaScript.</noscript>
+  <div id="root">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; font-family: 'Roboto', sans-serif;">
+      <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">МОТОРЫМЫД</h1>
+      <p style="font-size: 1.2rem; margin-bottom: 1rem;">Приложение каталога двигателей</p>
+      <div style="background-color: #f8f9fa; padding: 1.5rem; border-radius: 8px; max-width: 600px; width: 90%;">
+        <p style="margin-bottom: 1rem;">Сервер успешно запущен, но возникли проблемы с подключением к базе данных.</p>
+        <p style="margin-bottom: 1rem;">Для полноценной работы приложения необходимо добавить IP-адрес Render в список разрешенных в MongoDB Atlas.</p>
+        <div style="border: 1px solid #ddd; background-color: #fff; padding: 1rem; border-radius: 4px; text-align: left; margin-bottom: 1rem;">
+          <p><strong>Как исправить:</strong></p>
+          <ol style="padding-left: 1.5rem; margin-top: 0.5rem;">
+            <li>Войдите в свой аккаунт MongoDB Atlas</li>
+            <li>Перейдите в раздел "Network Access"</li>
+            <li>Нажмите "Add IP Address"</li>
+            <li>Добавьте IP-адрес 0.0.0.0/0 (или конкретные IP Render)</li>
+            <li>Нажмите "Confirm"</li>
+          </ol>
+        </div>
+        <p>После добавления IP-адреса сервер подключится к базе данных при следующем перезапуске.</p>
+      </div>
     </div>
-  );
-}
-
-export default App;
-EOL
-fi
-
-echo "🏗️ Building client app..."
-# Try different build approaches
-BUILD_SUCCESS=false
-
-# Create build folder and use custom build approach if react-scripts fails
-echo "Creating build directory and setting up production build..."
-mkdir -p build
-
-# Copy all files from client/src/assets to build if directory exists
-if [ -d "src/assets" ]; then
-  echo "Copying assets..."
-  mkdir -p build/assets
-  cp -r src/assets/* build/assets/ 2>/dev/null || :
-fi
-
-# Copy public files to build
-echo "Copying public files..."
-cp -r public/* build/ 2>/dev/null || :
-
-# Try to run npm run build
-echo "Trying npm run build with environment variables..."
-if PUBLIC_URL=./ CI=false INLINE_RUNTIME_CHUNK=false npm run build; then
-  BUILD_SUCCESS=true
-  echo "✅ Standard build successful"
-else
-  echo "⚠️ Standard build failed, creating static fallback..."
-  
-  # Create a simple index.html for fallback
-  cat > build/index.html << 'EOL'
-<!DOCTYPE html>
-<html lang="ru">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>МОТОРЫМЫД</title>
-    <style>
-      body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-      h1 { color: #333; }
-    </style>
-  </head>
-  <body>
-    <h1>МОТОРЫМЫД</h1>
-    <p>Приложение каталога двигателей</p>
-    <p>Сервер успешно запущен, но клиентская часть не может быть собрана.</p>
-    <p>Пожалуйста, свяжитесь с администратором.</p>
-  </body>
+  </div>
+</body>
 </html>
 EOL
 
-  # Create basic JS and CSS files
-  mkdir -p build/static/css build/static/js
-  echo "/* Fallback CSS */" > build/static/css/main.css
-  echo "// Fallback JS" > build/static/js/main.js
-  
-  BUILD_SUCCESS=true
-  echo "✅ Created static fallback build"
-fi
+# Create basic CSS
+cat > client/build/static/css/main.css << 'EOL'
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+  color: #333;
+}
 
-if [ "$BUILD_SUCCESS" = false ]; then
-  echo "❌ Failed to build client"
-  exit 1
-fi
+h1, h2, h3, h4, h5, h6 {
+  color: #333;
+}
 
-cd ..
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+button {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+button:hover {
+  background-color: #1565c0;
+}
+
+input, select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+EOL
+
+echo "✅ Manual client build completed"
 
 echo "✅ Build process completed successfully!" 

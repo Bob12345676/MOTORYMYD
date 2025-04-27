@@ -34,12 +34,17 @@ const MotorCard: React.FC<MotorCardProps> = ({ motor }) => {
       <CardMedia
         component="img"
         height="200"
-        image={motor.imageUrl || 'https://via.placeholder.com/300x200?text=Нет+изображения'}
+        image={motor.images && motor.images.length > 0 
+          ? motor.images[0] 
+          : 'https://via.placeholder.com/300x200?text=Нет+изображения'}
         alt={motor.name}
       />
       <CardContent sx={{ flexGrow: 1 }}>
         <Typography gutterBottom variant="h5" component="h2">
           {motor.name}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Модель: {motor.model}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           {motor.description.length > 100
@@ -51,6 +56,12 @@ const MotorCard: React.FC<MotorCardProps> = ({ motor }) => {
           <Chip
             label={`${motor.power} л.с.`}
             color="primary"
+            size="small"
+            sx={{ mb: 1 }}
+          />
+          <Chip
+            label={`${motor.speed} об/мин`}
+            color="info"
             size="small"
             sx={{ mb: 1 }}
           />
