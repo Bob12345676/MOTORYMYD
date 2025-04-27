@@ -11,12 +11,14 @@
     "install:server": "cd server && npm install",
     "install:client": "cd client && npm install",
     "install:all": "npm install && npm run install:server && npm run install:client",
-    "build": "cd client && npm run build"
+    "build:client": "cd client && npm install && npm run build",
+    "build": "npm run install:all && npm run build:client"
   },
   "engines": {
     "node": ">=14.0.0"
   },
   "dependencies": {
     "concurrently": "^8.2.2"
-  }
+  },
+  "license": "MIT"
 } 
