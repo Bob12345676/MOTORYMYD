@@ -1,135 +1,134 @@
+const fs = require('fs');
+const path = require('path');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const Motor = require('../models/Motor');
 const User = require('../models/User');
 
-// Загрузка переменных окружения
+// Загружаем переменные окружения
 dotenv.config();
 
-// Подключение к базе данных
+// Подключаемся к MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
 });
 
-// Тестовые данные для двигателей
+// Данные для заполнения
 const motors = [
   {
-    name: 'Motor 775',
-    model: '775-12V-288W',
-    description: 'Мощный двигатель постоянного тока 775 с высоким крутящим моментом. Идеально подходит для роботов, электроинструментов и других проектов, требующих высокой мощности.',
-    power: 288,
-    voltage: 12,
-    current: 20,
-    speed: 12000,
-    weight: 0.35,
+    name: 'Асинхронный двигатель АИР',
+    model: 'АИР100S4',
+    description: 'Энергоэффективный асинхронный двигатель для промышленного применения. Подходит для постоянных нагрузок и длительной работы.',
+    power: 3.0,
+    voltage: 380,
+    current: 6.5,
+    speed: 1500,
+    weight: 28,
     dimensions: {
-      length: 70,
-      width: 42,
-      height: 42
+      length: 340,
+      width: 226,
+      height: 235
     },
-    images: [
-      'https://via.placeholder.com/600x400?text=Motor+775+Image+1',
-      'https://via.placeholder.com/600x400?text=Motor+775+Image+2'
-    ],
-    features: [
-      'Высокая мощность',
-      'Низкий уровень шума',
-      'Длительный срок службы',
-      'Двойные шарикоподшипники'
-    ],
-    applications: [
-      'Роботы',
-      'Электроинструменты',
-      'Модели RC',
-      'Проекты DIY'
-    ],
-    price: 1200,
+    images: ['https://example.com/motors/air100s4.jpg'],
+    features: ['Высокий КПД', 'Низкий уровень шума', 'Защита IP55'],
+    applications: ['Насосы', 'Вентиляторы', 'Конвейеры'],
+    price: 12500,
     available: true
   },
   {
-    name: 'Motor 555',
-    model: '555-12V-150W',
-    description: 'Компактный двигатель постоянного тока средней мощности. Отлично подходит для небольших проектов и устройств.',
-    power: 150,
-    voltage: 12,
-    current: 12.5,
-    speed: 15000,
-    weight: 0.28,
+    name: 'Двигатель постоянного тока',
+    model: 'ДПТ-125',
+    description: 'Мощный двигатель постоянного тока с высоким моментом для применения в системах, требующих плавной регулировки скорости.',
+    power: 5.5,
+    voltage: 220,
+    current: 28,
+    speed: 3000,
+    weight: 45,
     dimensions: {
-      length: 60,
-      width: 36,
-      height: 36
+      length: 420,
+      width: 280,
+      height: 310
     },
-    images: [
-      'https://via.placeholder.com/600x400?text=Motor+555+Image+1',
-      'https://via.placeholder.com/600x400?text=Motor+555+Image+2'
-    ],
-    features: [
-      'Средняя мощность',
-      'Компактный размер',
-      'Низкое энергопотребление'
-    ],
-    applications: [
-      'Бытовые приборы',
-      'Небольшие электроинструменты',
-      'Модели RC'
-    ],
-    price: 900,
+    images: ['https://example.com/motors/dpt125.jpg'],
+    features: ['Высокий пусковой момент', 'Широкий диапазон регулирования', 'Компактность'],
+    applications: ['Станки', 'Подъемные механизмы', 'Транспортные системы'],
+    price: 24800,
     available: true
   },
   {
-    name: 'Motor 895',
-    model: '895-24V-350W',
-    description: 'Высокомощный двигатель постоянного тока для профессиональных приложений. Обеспечивает высокий крутящий момент и надежную работу в тяжелых условиях.',
-    power: 350,
-    voltage: 24,
-    current: 14.6,
-    speed: 10000,
-    weight: 0.48,
+    name: 'Шаговый двигатель',
+    model: 'NEMA 23',
+    description: 'Прецизионный шаговый двигатель для систем автоматизации и ЧПУ с высокой точностью позиционирования.',
+    power: 0.5,
+    voltage: 48,
+    current: 2.8,
+    speed: 600,
+    weight: 0.7,
     dimensions: {
-      length: 90,
-      width: 50,
-      height: 50
+      length: 56,
+      width: 56,
+      height: 78
     },
-    images: [
-      'https://via.placeholder.com/600x400?text=Motor+895+Image+1',
-      'https://via.placeholder.com/600x400?text=Motor+895+Image+2'
-    ],
-    features: [
-      'Сверхвысокая мощность',
-      'Усиленная конструкция',
-      'Промышленное качество',
-      'Охлаждающий вентилятор'
-    ],
-    applications: [
-      'Промышленное оборудование',
-      'Электротранспорт',
-      'Профессиональные инструменты'
-    ],
-    price: 1800,
+    images: ['https://example.com/motors/nema23.jpg'],
+    features: ['Высокая точность', 'Угол шага 1.8°', 'Низкое энергопотребление'],
+    applications: ['3D принтеры', 'ЧПУ станки', 'Робототехника'],
+    price: 3800,
+    available: true
+  },
+  {
+    name: 'Сервопривод',
+    model: 'SERVO-180',
+    description: 'Высокоточный сервопривод с обратной связью для автоматизации производства и робототехники.',
+    power: 2.2,
+    voltage: 220,
+    current: 10,
+    speed: 4500,
+    weight: 12,
+    dimensions: {
+      length: 240,
+      width: 150,
+      height: 180
+    },
+    images: ['https://example.com/motors/servo180.jpg'],
+    features: ['Обратная связь', 'Высокая динамика', 'Точное позиционирование'],
+    applications: ['Промышленные роботы', 'Упаковочное оборудование', 'Прецизионная механика'],
+    price: 32500,
+    available: true
+  },
+  {
+    name: 'Бесщеточный двигатель',
+    model: 'BLDC-2000',
+    description: 'Современный бесщеточный двигатель с электронным управлением для высоконагруженных применений.',
+    power: 1.5,
+    voltage: 48,
+    current: 35,
+    speed: 2000,
+    weight: 8.5,
+    dimensions: {
+      length: 180,
+      width: 120,
+      height: 120
+    },
+    images: ['https://example.com/motors/bldc2000.jpg'],
+    features: ['Высокая эффективность', 'Длительный срок службы', 'Компактность'],
+    applications: ['Электротранспорт', 'Дроны', 'Промышленная автоматика'],
+    price: 18900,
     available: true
   }
 ];
 
-// Тестовые данные для пользователей
 const users = [
   {
     username: 'admin',
     email: 'admin@example.com',
-    password: 'admin12345',
+    password: 'admin123',
     role: 'admin'
-  },
-  {
-    username: 'editor',
-    email: 'editor@example.com',
-    password: 'editor12345',
-    role: 'editor'
   },
   {
     username: 'user',
     email: 'user@example.com',
-    password: 'user12345',
+    password: 'user123',
     role: 'user'
   }
 ];
@@ -137,14 +136,12 @@ const users = [
 // Функция для импорта данных
 const importData = async () => {
   try {
-    // Очистка базы данных
+    // Очищаем текущие данные
     await Motor.deleteMany();
     await User.deleteMany();
     
-    // Импорт двигателей
+    // Импортируем новые данные
     await Motor.insertMany(motors);
-    
-    // Импорт пользователей
     await User.create(users);
     
     console.log('Данные успешно импортированы');
@@ -155,5 +152,26 @@ const importData = async () => {
   }
 };
 
-// Запуск импорта
-importData(); 
+// Функция для удаления всех данных
+const deleteData = async () => {
+  try {
+    await Motor.deleteMany();
+    await User.deleteMany();
+    
+    console.log('Данные успешно удалены');
+    process.exit();
+  } catch (error) {
+    console.error(`Ошибка: ${error.message}`);
+    process.exit(1);
+  }
+};
+
+// Проверяем аргументы командной строки
+if (process.argv[2] === '-i') {
+  importData();
+} else if (process.argv[2] === '-d') {
+  deleteData();
+} else {
+  console.log('Пожалуйста, укажите флаг: -i (импорт) или -d (удаление)');
+  process.exit();
+} 

@@ -1,8 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Motor } from '../../types/Motor';
 import { RootState } from '../store';
+import api from '../../utils/api';
 
 interface Dimensions {
   length: number;
@@ -73,7 +73,7 @@ export const fetchMotors = createAsyncThunk(
     const { page, limit } = motors.pagination;
     const { search, minPower, maxPower, available } = motors.filters;
 
-    let url = `/api/motors?page=${page}&limit=${limit}`;
+    let url = `/motors?page=${page}&limit=${limit}`;
 
     if (search) {
       url += `&search=${search}`;
@@ -92,7 +92,7 @@ export const fetchMotors = createAsyncThunk(
     }
 
     try {
-      const response = await axios.get<MotorsResponse>(url);
+      const response = await api.get<MotorsResponse>(url);
       return response.data;
     } catch (error: any) {
       if (error.response && error.response.data.error) {
@@ -109,7 +109,7 @@ export const fetchMotorById = createAsyncThunk(
   'motors/fetchMotorById',
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await axios.get<MotorResponse>(`/api/motors/${id}`);
+      const response = await api.get<MotorResponse>(`/motors/${id}`);
       return response.data;
     } catch (error: any) {
       if (error.response && error.response.data.error) {
@@ -126,12 +126,7 @@ export const createMotor = createAsyncThunk(
   'motors/createMotor',
   async (motorData: Partial<Motor>, { rejectWithValue }) => {
     try {
-      const response = await axios.post<MotorResponse>('/api/motors', motorData, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const response = await api.post<MotorResponse>('/motors', motorData);
       toast.success('Двигатель успешно создан');
       return response.data;
     } catch (error: any) {
@@ -151,12 +146,7 @@ export const updateMotor = createAsyncThunk(
   'motors/updateMotor',
   async ({ id, motorData }: { id: string; motorData: Partial<Motor> }, { rejectWithValue }) => {
     try {
-      const response = await axios.put<MotorResponse>(`/api/motors/${id}`, motorData, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      const response = await api.put<MotorResponse>(`/motors/${id}`, motorData);
       toast.success('Двигатель успешно обновлен');
       return response.data;
     } catch (error: any) {
@@ -176,11 +166,7 @@ export const deleteMotor = createAsyncThunk(
   'motors/deleteMotor',
   async (id: string, { rejectWithValue }) => {
     try {
-      await axios.delete(`/api/motors/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+      await api.delete(`/motors/${id}`);
       toast.success('Двигатель успешно удален');
       return id;
     } catch (error: any) {

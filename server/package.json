@@ -24,9 +24,12 @@
     "validator": "^13.7.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.16"
+    "nodemon": "^2.0.22"
   },
   "engines": {
     "node": ">=14.0.0"
-  }
-} 
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
