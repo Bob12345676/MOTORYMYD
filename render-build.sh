@@ -119,6 +119,11 @@ cd client
 echo "🔧 Installing client dependencies..."
 npm install --force
 
+# Fix permissions for react-scripts
+echo "🔧 Fixing permissions for react-scripts..."
+chmod +x node_modules/.bin/react-scripts
+chmod +x node_modules/react-scripts/bin/react-scripts.js
+
 # Create a minimal App.js if needed
 if [ ! -d "src" ]; then
   echo "⚠️ Creating minimal React app structure..."
@@ -173,19 +178,19 @@ echo "🏗️ Building client app..."
 # Try different build approaches
 BUILD_SUCCESS=false
 
-# Approach 1: Standard React Scripts Build
-echo "Trying standard build..."
-if npm run build; then
+# Approach 1: Direct build with CI=false to ignore warnings
+echo "Trying build with CI=false..."
+if CI=false NODE_ENV=production node ./node_modules/.bin/react-scripts build; then
   BUILD_SUCCESS=true
   echo "✅ Standard build successful"
 else
   echo "⚠️ Standard build failed, trying fallback methods..."
   
-  # Approach 2: Using npx
-  echo "Trying npx react-scripts build..."
-  if npx react-scripts build; then
+  # Approach 2: Using npx with executable path
+  echo "Trying build with explicit path..."
+  if CI=false NODE_ENV=production node node_modules/react-scripts/scripts/build.js; then
     BUILD_SUCCESS=true
-    echo "✅ npx build successful"
+    echo "✅ Explicit path build successful"
   else  
     # Approach 3: Create minimal build manually
     echo "⚠️ All build methods failed, creating minimal static build..."

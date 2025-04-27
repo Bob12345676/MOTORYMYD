@@ -10,7 +10,8 @@
     "client": "cd client && npm start",
     "build": "bash render-build.sh",
     "install:all": "npm install && cd client && npm install && cd ../server && npm install",
-    "heroku-postbuild": "bash render-build.sh"
+    "heroku-postbuild": "bash render-build.sh",
+    "prebuild": "chmod -R +x ./client/node_modules/.bin"
   },
   "keywords": [
     "motors",
