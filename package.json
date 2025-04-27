@@ -11,8 +11,9 @@
     "install:server": "cd server && npm install",
     "install:client": "cd client && npm install",
     "install:all": "npm install && npm run install:server && npm run install:client",
-    "build:client": "cd client && npm install && npm run build",
-    "build": "npm run install:all && npm run build:client"
+    "build:client": "cd client && npm install && NODE_ENV=production npx --no-install react-scripts build",
+    "build": "npm run install:all && npm run build:client",
+    "build:render": "npm run install:all && cd client && CI=false npm run build"
   },
   "engines": {
     "node": ">=14.0.0"
