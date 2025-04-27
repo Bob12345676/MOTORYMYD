@@ -1,25 +1,30 @@
 {
   "name": "motorymyd",
   "version": "1.0.0",
-  "description": "МОТО РЫМЫД - приложение для каталога двигателей",
-  "main": "index.js",
+  "description": "Приложение каталога двигателей",
+  "main": "server/server.js",
   "scripts": {
-    "start": "cd server && npm start",
-    "dev:server": "cd server && npm run dev",
-    "dev:client": "cd client && npm start",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "install:server": "cd server && npm install",
-    "install:client": "cd client && npm install",
-    "install:all": "npm install && npm run install:server && npm run install:client",
-    "build:client": "cd client && npm install && CI=false NODE_OPTIONS=--openssl-legacy-provider npm run build",
-    "build": "npm run install:all && npm run build:client",
-    "build:render": "bash render-build.sh"
+    "start": "node server/server.js",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "build": "bash render-build.sh",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+    "heroku-postbuild": "bash render-build.sh"
   },
-  "engines": {
-    "node": ">=14.0.0"
-  },
+  "keywords": [
+    "motors",
+    "catalog",
+    "react",
+    "nodejs",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "concurrently": "^8.2.2"
   },
-  "license": "MIT"
+  "engines": {
+    "node": ">=14.0.0"
+  }
 } 
