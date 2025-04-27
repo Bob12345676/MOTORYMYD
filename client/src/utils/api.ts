@@ -1,10 +1,12 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
+// Создаем экземпляр axios с базовым URL
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: '/',
 });
 
-// Добавляем JWT токен к каждому запросу
+// Добавляем интерцептор для запросов - добавляет токен к запросам
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -13,15 +15,16 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Обрабатываем ошибки ответов
+// Добавляем интерцептор для ответов - обрабатывает ошибки
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Если сервер вернул 401, значит токен недействителен или истек
+      // Если токен недействителен или истек
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
+      toast.error('Сессия истекла. Пожалуйста, войдите снова.');
     }
     return Promise.reject(error);
   }

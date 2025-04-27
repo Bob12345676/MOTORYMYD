@@ -20,7 +20,7 @@ export const checkAuth = createAsyncThunk('auth/checkAuth', async (_, { rejectWi
       return rejectWithValue('Токен не найден');
     }
 
-    const response = await api.get('/auth/me');
+    const response = await api.get('/api/auth/me');
     return { user: response.data.data, token };
   } catch (error: any) {
     localStorage.removeItem('token');
@@ -40,7 +40,7 @@ export const register = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await api.post('/auth/register', userData);
+      const response = await api.post('/api/auth/register', userData);
       
       const { token, data } = response.data;
       localStorage.setItem('token', token);
@@ -65,7 +65,7 @@ export const login = createAsyncThunk(
   'auth/login',
   async (userData: { email: string; password: string }, { rejectWithValue }) => {
     try {
-      const response = await api.post('/auth/login', userData);
+      const response = await api.post('/api/auth/login', userData);
       
       const { token, data } = response.data;
       localStorage.setItem('token', token);
@@ -88,7 +88,7 @@ export const login = createAsyncThunk(
 // Выход пользователя
 export const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
   try {
-    await api.post('/auth/logout');
+    await api.post('/api/auth/logout');
     
     localStorage.removeItem('token');
     toast.success('Выход выполнен');

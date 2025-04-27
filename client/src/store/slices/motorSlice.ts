@@ -54,7 +54,7 @@ export const fetchMotors = createAsyncThunk(
     const { page, limit } = motors.pagination;
     const { search, minPower, maxPower, available } = motors.filters;
 
-    let url = `/motors?page=${page}&limit=${limit}`;
+    let url = `/api/motors?page=${page}&limit=${limit}`;
 
     if (search) {
       url += `&search=${search}`;
@@ -90,7 +90,7 @@ export const fetchMotorById = createAsyncThunk(
   'motors/fetchMotorById',
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await api.get<MotorResponse>(`/motors/${id}`);
+      const response = await api.get<MotorResponse>(`/api/motors/${id}`);
       return response.data;
     } catch (error: any) {
       if (error.response && error.response.data.error) {
@@ -107,7 +107,7 @@ export const createMotor = createAsyncThunk(
   'motors/createMotor',
   async (motorData: Partial<Motor>, { rejectWithValue }) => {
     try {
-      const response = await api.post<MotorResponse>('/motors', motorData);
+      const response = await api.post<MotorResponse>('/api/motors', motorData);
       toast.success('Двигатель успешно создан');
       return response.data;
     } catch (error: any) {
@@ -127,7 +127,7 @@ export const updateMotor = createAsyncThunk(
   'motors/updateMotor',
   async ({ id, motorData }: { id: string; motorData: Partial<Motor> }, { rejectWithValue }) => {
     try {
-      const response = await api.put<MotorResponse>(`/motors/${id}`, motorData);
+      const response = await api.put<MotorResponse>(`/api/motors/${id}`, motorData);
       toast.success('Двигатель успешно обновлен');
       return response.data;
     } catch (error: any) {
@@ -147,7 +147,7 @@ export const deleteMotor = createAsyncThunk(
   'motors/deleteMotor',
   async (id: string, { rejectWithValue }) => {
     try {
-      await api.delete(`/motors/${id}`);
+      await api.delete(`/api/motors/${id}`);
       toast.success('Двигатель успешно удален');
       return id;
     } catch (error: any) {
